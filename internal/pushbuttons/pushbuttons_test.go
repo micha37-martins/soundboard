@@ -75,30 +75,52 @@ func TestCheckPins(t *testing.T) {
 		name             string
 		testNotification testNotification
 		folder           string
-		expectedError    string
+		expectedErr      string
 	}{
 		{
-			name:             "checkPinsTest01",
+			name:             "checkPins value=0",
 			testNotification: testNotification{pin: somePin, value: 0},
 			folder:           "./testdata/onlymp3/",
-			expectedError:    "",
+			expectedErr:      "",
 		},
 		{
-			name:             "checkPinsTest02",
-			testNotification: testNotification{pin: somePin, value: 0},
+			name:             "checkPins value=1",
+			testNotification: testNotification{pin: somePin, value: 1},
 			folder:           "./testdata/onlymp3/",
-			expectedError:    "",
+			expectedErr:      "",
+		},
+		{
+			name:             "checkPins value=5",
+			testNotification: testNotification{pin: somePin, value: 5},
+			folder:           "./testdata/onlymp3/",
+			expectedErr:      "Pin value ot of scope. Only 0 or 1 allowed, got 5.",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			watcher.notification <- test.testNotification
-			wConf := newWatchConfig(test.folder, testPlayer, watcher)
-			wConf.checkPins()
-			log.Println("Test", test.name, "went through")
-			//if err.Error() != test.expectedError {
-			//	t.Errorf("Got %s, expected %s", err, test.expectedError)
-			//}
+			wConf := newWatcherConfig(test.folder, testPlayer, watcher)
+
+			pin, value := wConf.checkPins()
+
+			t.Log("Pin: ", pin, "Value: ", value)
+
+			resultedErr := ""
+
+			select {
+			case err, ok := <-wConf.errChan:
+				if ok {
+					t.Log("Error detected: ", err)
+					resultedErr = err.Error() // error type to string
+				} else {
+					t.Log("Channel closed")
+				}
+			default:
+				t.Log("No errors")
+			}
+			if resultedErr != test.expectedErr {
+				t.Errorf("Got %q, expected %q", resultedErr, test.expectedErr)
+			}
 		})
 	}
 }
