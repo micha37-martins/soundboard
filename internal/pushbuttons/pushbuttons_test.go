@@ -1,8 +1,3 @@
-/*
-- wConf.
-watcher (nur in CheckPins und PushedButtons
-errChan
-*/
 package pushbuttons
 
 import (
@@ -30,8 +25,6 @@ type testPlayerConfig struct {
 }
 
 type testWatcherConfig struct {
-	folder  string
-	player  Player
 	watcher Watcher
 }
 
@@ -39,11 +32,10 @@ func newTestPlayer() *testPlayer {
 	return &testPlayer{}
 }
 
-func newTestWatcherConfig(folder string, player Player, watcher Watcher) *watcherConfig {
+func newTestWatcherConfig(watcher Watcher) *watcherConfig {
 	return &watcherConfig{watcher: watcher}
 }
 
-// NewTestPlayerConfig constructor for instanciating testPlayerConfig
 func NewTestPlayerConfig(folder string, player Player) *testPlayerConfig {
 	pc := new(testPlayerConfig)
 	pc.folder = folder
@@ -63,6 +55,7 @@ func newTestWatcher() *testWatcher {
 // Users can either use Watch() or receive from Watcher.Notification directly
 func (w *testWatcher) Watch() (uint, uint) {
 	notification := <-w.notification
+
 	return notification.pin, notification.value
 }
 
@@ -80,7 +73,6 @@ func (tp *testPlayerConfig) watchPins(wConf *watcherConfig, errChan chan error) 
 	errChan <- errors.New("Some error occurred!")
 }
 
-//TODO watch pins func beenden mit error z.B.
 func (tp *testPlayer) play(fileName string) {
 	log.Printf("Testing not playing %s", fileName)
 }

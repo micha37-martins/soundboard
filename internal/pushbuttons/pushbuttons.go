@@ -42,6 +42,11 @@ type PinWatcher interface {
 	watchPins(wConf *watcherConfig, errChan chan error)
 }
 
+// NewGpioWatcher creates a gpio-Watcher for checking gpio pins
+func NewGpioWatcher() Watcher {
+	return gpio.NewWatcher()
+}
+
 // NewWatcherConfig constructor for instanciating watcherConfig
 func NewWatcherConfig(watcher Watcher) *watcherConfig {
 	return &watcherConfig{watcher: watcher}
@@ -55,7 +60,7 @@ func NewPlayerConfig(folder string, player Player) *playerConfig {
 	return pc
 }
 
-// play calls PlaySound function start playing file
+// play calls PlaySound function to start playing file
 func (p *playerConfig) play(path string) {
 	log.Println("folder + fileName =", path)
 
@@ -81,7 +86,7 @@ func (pConf *playerConfig) mapAndPlay(errChan chan error, pin uint) {
 
 // checkPins checks if a button has been pushed
 // pullup resistor has "1" set as default value for pins
-// notice: zero value of uint is 0
+// notice: zero-value of uint is 0
 func (pConf *playerConfig) checkPins(watcher Watcher, errChan chan error) (uint, uint) {
 	var pin uint = 0
 	var value uint = 1
@@ -100,8 +105,7 @@ func (pConf *playerConfig) checkPins(watcher Watcher, errChan chan error) (uint,
 	return pin, value
 }
 
-// TODO nur einmal testen mit echten pfaden ob files abgespielt werden und zwar im "player" package
-// watchPins continously calls the checkPins to test if a button has been pushed
+// watchPins continously calls checkPins to test if a button has been pushed
 func (pConf *playerConfig) watchPins(wConf *watcherConfig, errChan chan error) {
 	log.Println("ButtonMap: ", buttonMap)
 
@@ -117,15 +121,9 @@ func (pConf *playerConfig) watchPins(wConf *watcherConfig, errChan chan error) {
 	}
 }
 
-//TODO integrieren
-func NewGpioWatcher() Watcher {
-	return gpio.NewWatcher()
-}
-
-// PushedButtons creates a "watcher" listening on the specified buttons
-// if a button is pressed the assigned sound-file will be played
-
-//TODO PinWatcher interface hier statt des struct implementieren (muss aber in einem struct sein)
+// PushedButtons assigns a pin his corresponding name and adds it
+// to the watcher. If a button is pressed the assigned sound-file
+// will be played
 func (wConf *watcherConfig) PushedButtons(pConf PinWatcher, errChan chan error) error {
 	// Watcher is a type which listens on the GPIO pins you specify and
 	// then notifies you when the values of those pins change.
@@ -140,12 +138,7 @@ func (wConf *watcherConfig) PushedButtons(pConf PinWatcher, errChan chan error) 
 
 	defer close(errChan)
 
-	// TODO watchPins wegmocken
 	go pConf.watchPins(wConf, errChan)
 
-	// TODO evaluieren: Idee statt loop durch channel der fehler aufnimmt blocken
-	// eventuell ergibt es sinn den errChan auf länge 0 zu setzen um ihn zum blcoken zu nutzen
 	return <-errChan
-	// TODO replace
-	//time.Sleep(time.Second * 120)
 }
