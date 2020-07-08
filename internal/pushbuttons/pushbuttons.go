@@ -17,13 +17,13 @@ import (
 // Initialize ButtonMap
 var buttonMap = config.InitializeButtonMap()
 
-type playerConfig struct{}
-
 type watcherConfig struct {
-	errChan chan error
-	folder  string
-	player  Player
 	watcher Watcher
+}
+
+type playerConfig struct {
+	folder string
+	player Player
 }
 
 // Player defines interface for music player
@@ -38,14 +38,21 @@ type Watcher interface {
 	Close()
 }
 
-// newWatcherConfig constructor for instanciating watcherConfig
-func newWatcherConfig(folder string, player Player, watcher Watcher) *watcherConfig {
-	w := new(watcherConfig)
-	w.folder = folder
-	w.player = player
-	w.errChan = make(chan error, 1)
-	w.watcher = watcher
-	return w
+type PinWatcher interface {
+	watchPins(wConf *watcherConfig, errChan chan error)
+}
+
+// NewWatcherConfig constructor for instanciating watcherConfig
+func NewWatcherConfig(watcher Watcher) *watcherConfig {
+	return &watcherConfig{watcher: watcher}
+}
+
+// NewPlayerConfig constructor for instanciating watchConfig
+func NewPlayerConfig(folder string, player Player) *playerConfig {
+	pc := new(playerConfig)
+	pc.folder = folder
+	pc.player = player
+	return pc
 }
 
 // play calls PlaySound function start playing file
@@ -56,34 +63,34 @@ func (p *playerConfig) play(path string) {
 }
 
 // mapAndPlay finds values by key and hands path to player
-func (wConf *watcherConfig) mapAndPlay(pin uint) {
+func (pConf *playerConfig) mapAndPlay(errChan chan error, pin uint) {
 	if name, ok := buttonMap[pin]; ok {
-		fileName, err := filechecks.FileMapper(wConf.folder, name)
+		fileName, err := filechecks.FileMapper(pConf.folder, name)
 
 		if err != nil {
-			wConf.errChan <- err
+			errChan <- err
 		}
 
-		log.Printf("Folder: %s - Filename: %s", wConf.folder, fileName)
+		log.Printf("Folder: %s - Filename: %s", pConf.folder, fileName)
 
-		wConf.player.play(wConf.folder + fileName)
+		pConf.player.play(pConf.folder + fileName)
 	} else {
-		wConf.errChan <- errors.New("No file mapped to pushed button")
+		errChan <- errors.New("No file mapped to pushed button.")
 	}
 }
 
 // checkPins checks if a button has been pushed
 // pullup resistor has "1" set as default value for pins
 // notice: zero value of uint is 0
-func (wConf *watcherConfig) checkPins() (uint, uint) {
+func (pConf *playerConfig) checkPins(watcher Watcher, errChan chan error) (uint, uint) {
 	var pin uint = 0
 	var value uint = 1
 
-	pin, value = wConf.watcher.Watch()
+	pin, value = watcher.Watch()
 
 	if value != 0 && value != 1 {
 		e := fmt.Sprintf("Pin value ot of scope. Only 0 or 1 allowed, got %d.", value)
-		wConf.errChan <- errors.New(e)
+		errChan <- errors.New(e)
 		return 0, 0
 	}
 
@@ -93,50 +100,52 @@ func (wConf *watcherConfig) checkPins() (uint, uint) {
 	return pin, value
 }
 
-// TODO als nächstes error channel testen
-// z.B errc := make(chan error, 1) vor der gofunc deklarieren und handlen
 // TODO nur einmal testen mit echten pfaden ob files abgespielt werden und zwar im "player" package
-//WatchPins continously calls the checkPins to test if a button has been pushed
-func (wConf *watcherConfig) WatchPins() {
+// watchPins continously calls the checkPins to test if a button has been pushed
+func (pConf *playerConfig) watchPins(wConf *watcherConfig, errChan chan error) {
 	log.Println("ButtonMap: ", buttonMap)
 
 	for {
 		// slow down loop to go easy on resources
 		time.Sleep(time.Second / 2)
 
-		pin, value := wConf.checkPins()
+		pin, value := pConf.checkPins(wConf.watcher, errChan)
 
 		if value == 0 {
-			wConf.mapAndPlay(pin)
+			pConf.mapAndPlay(errChan, pin)
 		}
 	}
 }
 
+//TODO integrieren
+func NewGpioWatcher() Watcher {
+	return gpio.NewWatcher()
+}
+
 // PushedButtons creates a "watcher" listening on the specified buttons
 // if a button is pressed the assigned sound-file will be played
-func PushedButtons(folder string) error {
+
+//TODO PinWatcher interface hier statt des struct implementieren (muss aber in einem struct sein)
+func (wConf *watcherConfig) PushedButtons(pConf PinWatcher, errChan chan error) error {
 	// Watcher is a type which listens on the GPIO pins you specify and
 	// then notifies you when the values of those pins change.
-	watcher := gpio.NewWatcher()
-	defer watcher.Close()
-
-	player := &playerConfig{}
+	defer wConf.watcher.Close()
 
 	// range over list of Buttons and add pin to watcher
 	for pin, name := range buttonMap {
 		log.Println("Name:", name, "Adding Pin:", pin)
 
-		watcher.AddPin(pin)
+		wConf.watcher.AddPin(pin)
 	}
 
-	wConf := newWatcherConfig(folder, player, watcher)
-	defer close(wConf.errChan)
-	go wConf.WatchPins()
+	defer close(errChan)
+
+	// TODO watchPins wegmocken
+	go pConf.watchPins(wConf, errChan)
 
 	// TODO evaluieren: Idee statt loop durch channel der fehler aufnimmt blocken
 	// eventuell ergibt es sinn den errChan auf länge 0 zu setzen um ihn zum blcoken zu nutzen
-	err := <-wConf.errChan
-	return err
+	return <-errChan
 	// TODO replace
 	//time.Sleep(time.Second * 120)
 }

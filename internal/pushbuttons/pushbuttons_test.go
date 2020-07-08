@@ -1,12 +1,15 @@
+/*
+- wConf.
+watcher (nur in CheckPins und PushedButtons
+errChan
+*/
 package pushbuttons
 
 import (
+	"errors"
 	"log"
-	"soundboard/internal/config"
 	"testing"
 )
-
-var buttons = config.InitializeButtonMap()
 
 type testNotification struct {
 	pin   uint
@@ -21,11 +24,34 @@ type testWatcher struct {
 
 type testPlayer struct{}
 
+type testPlayerConfig struct {
+	folder string
+	player Player
+}
+
+type testWatcherConfig struct {
+	folder  string
+	player  Player
+	watcher Watcher
+}
+
 func newTestPlayer() *testPlayer {
 	return &testPlayer{}
 }
 
-// The following testcode is inspired by martinohmanns code:
+func newTestWatcherConfig(folder string, player Player, watcher Watcher) *watcherConfig {
+	return &watcherConfig{watcher: watcher}
+}
+
+// NewTestPlayerConfig constructor for instanciating testPlayerConfig
+func NewTestPlayerConfig(folder string, player Player) *testPlayerConfig {
+	pc := new(testPlayerConfig)
+	pc.folder = folder
+	pc.player = player
+	return pc
+}
+
+// The following testcode is inspired by code from:
 // https://github.com/martinohmann/rfoutlet/
 func newTestWatcher() *testWatcher {
 	return &testWatcher{notification: make(chan testNotification, 1)}
@@ -48,7 +74,13 @@ func (w *testWatcher) Close() {
 	w.closed = true
 }
 
-//todo watch pins func beenden mit error z.B.
+func (tp *testPlayerConfig) watchPins(wConf *watcherConfig, errChan chan error) {
+	log.Println("Mocked watchPins() function. Just returning error.")
+
+	errChan <- errors.New("Some error occurred!")
+}
+
+//TODO watch pins func beenden mit error z.B.
 func (tp *testPlayer) play(fileName string) {
 	log.Printf("Testing not playing %s", fileName)
 }
@@ -62,13 +94,11 @@ func getSomeKey(m map[uint]string) uint {
 	return 0
 }
 
-//end testcode mohmann
-// es muss ein Watcher und ein folder an die Funktion übergeben werden
-// testsound can be found here:
+// testsound can be found at:
 // https://freesound.org/people/ramsamba/sounds/318687/
 func TestCheckPins(t *testing.T) {
 	watcher := newTestWatcher()
-	somePin := getSomeKey(buttons)
+	somePin := getSomeKey(buttonMap)
 	testPlayer := newTestPlayer()
 
 	tests := []struct {
@@ -96,19 +126,21 @@ func TestCheckPins(t *testing.T) {
 			expectedErr:      "Pin value ot of scope. Only 0 or 1 allowed, got 5.",
 		},
 	}
+
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			watcher.notification <- test.testNotification
-			wConf := newWatcherConfig(test.folder, testPlayer, watcher)
+			pConf := NewPlayerConfig(test.folder, testPlayer)
+			errChan := make(chan error, 1)
 
-			pin, value := wConf.checkPins()
+			pin, value := pConf.checkPins(watcher, errChan)
 
 			t.Log("Pin: ", pin, "Value: ", value)
 
 			resultedErr := ""
 
 			select {
-			case err, ok := <-wConf.errChan:
+			case err, ok := <-errChan:
 				if ok {
 					t.Log("Error detected: ", err)
 					resultedErr = err.Error() // error type to string
@@ -119,6 +151,107 @@ func TestCheckPins(t *testing.T) {
 				t.Log("No errors")
 			}
 			if resultedErr != test.expectedErr {
+				t.Errorf("Got %q, expected %q", resultedErr, test.expectedErr)
+			}
+		})
+	}
+}
+
+func TestMapAndPlay(t *testing.T) {
+	somePin := getSomeKey(buttonMap)
+	testPlayer := newTestPlayer()
+
+	tests := []struct {
+		name        string
+		pin         uint
+		folder      string
+		expectedErr string
+	}{
+		{
+			name:        "Existing Pin",
+			pin:         somePin,
+			folder:      "./testdata/onlymp3/",
+			expectedErr: "",
+		},
+		{
+			name:        "Pin should not exist",
+			pin:         999,
+			folder:      "./testdata/onlymp3/",
+			expectedErr: "No file mapped to pushed button.",
+		},
+		{
+			name:        "Folder should not exist",
+			pin:         somePin,
+			folder:      "./notexisting/",
+			expectedErr: "open ./notexisting/: no such file or directory",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			pConf := NewPlayerConfig(test.folder, testPlayer)
+			errChan := make(chan error, 1)
+
+			pConf.mapAndPlay(errChan, test.pin)
+			resultedErr := ""
+
+			select {
+			case err, ok := <-errChan:
+				if ok {
+					t.Log("Error detected: ", err)
+					resultedErr = err.Error() // error type to string
+				} else {
+					t.Log("Channel closed")
+				}
+			default:
+				t.Log("No errors")
+			}
+			if resultedErr != test.expectedErr {
+				t.Errorf("Got %q, expected %q", resultedErr, test.expectedErr)
+			}
+		})
+	}
+}
+
+func TestPushedButtons(t *testing.T) {
+	somePin := getSomeKey(buttonMap)
+	testPlayer := newTestPlayer()
+	watcher := newTestWatcher()
+	testWatcherConfig := NewWatcherConfig(watcher)
+
+	tests := []struct {
+		name        string
+		pin         uint
+		folder      string
+		expectedErr string
+	}{
+		{
+			name:        "Loop stops because of error",
+			pin:         somePin,
+			folder:      "./testdata/onlymp3/",
+			expectedErr: "Some error occurred!",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			errChan := make(chan error, 1)
+			testPlayerConfig := NewTestPlayerConfig(test.folder, testPlayer)
+			var resultedErr error
+			resultedErr = testWatcherConfig.PushedButtons(testPlayerConfig, errChan)
+
+			select {
+			case err, ok := <-errChan:
+				if ok {
+					t.Log("Error detected: ", err)
+					resultedErr = err // error type to string
+				} else {
+					t.Log("Channel closed")
+				}
+			default:
+				t.Log("No errors")
+			}
+			if resultedErr.Error() != test.expectedErr {
 				t.Errorf("Got %q, expected %q", resultedErr, test.expectedErr)
 			}
 		})
