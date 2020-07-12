@@ -17,6 +17,9 @@ import (
 // Initialize ButtonMap
 var buttonMap = config.InitializeButtonMap()
 
+// realPlay is used to implement Player interface in a non test situation
+type RealPlay struct{}
+
 type watcherConfig struct {
 	watcher Watcher
 }
@@ -61,7 +64,7 @@ func NewPlayerConfig(folder string, player Player) *playerConfig {
 }
 
 // play calls PlaySound function to start playing file
-func (p *playerConfig) play(path string) {
+func (p *RealPlay) play(path string) {
 	log.Println("folder + fileName =", path)
 
 	soundboard.PlaySound(path)
@@ -124,7 +127,7 @@ func (pConf *playerConfig) watchPins(wConf *watcherConfig, errChan chan error) {
 // PushedButtons assigns a pin his corresponding name and adds it
 // to the watcher. If a button is pressed the assigned sound-file
 // will be played
-func (wConf *watcherConfig) PushedButtons(pConf PinWatcher, errChan chan error) error {
+func PushedButtons(pConf PinWatcher, wConf *watcherConfig, errChan chan error) error {
 	// Watcher is a type which listens on the GPIO pins you specify and
 	// then notifies you when the values of those pins change.
 	defer wConf.watcher.Close()

@@ -3,7 +3,7 @@ package soundboard
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
+	"log"
 
 	"github.com/bobertlo/go-mpg123/mpg123"
 	"github.com/gordonklaus/portaudio"
@@ -13,7 +13,7 @@ import (
 // it is based on the example from gordonklaus/portaudio:
 // https://github.com/gordonklaus/portaudio/blob/master/examples/mp3.go
 func PlaySound(filePath string) {
-	fmt.Println("Playing: ", filePath)
+	log.Println("Playing: ", filePath)
 
 	// create mpg123 decoder instance
 	decoder, err := mpg123.NewDecoder("")

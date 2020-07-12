@@ -4,27 +4,28 @@ import (
 	"log"
 	"os"
 	"soundboard/internal/config"
-	fake "soundboard/internal/fake/pushbuttons"
 	"soundboard/internal/filechecks"
+	"soundboard/internal/pushbuttons"
 )
 
 func main() {
 	log.SetOutput(os.Stdout)
 
+	soundfiles := config.SoundfilesFolder
+
 	// check if all files use thre correct format (audio/mpeg)
-	fileErr := filechecks.CheckFiletype(config.SoundfilesFolder, "audio/mpeg")
+	fileErr := filechecks.CheckFiletype(soundfiles, "audio/mpeg")
 	if fileErr != nil {
 		log.Fatal(fileErr)
 	}
-	/*
 
-		err := pushbuttons.PushedButtons()
-		if err != nil {
-			log.Fatal(err)
-		}
-	*/
-	err2 := fake.PushedButtons(config.SoundfilesFolder)
-	if err2 != nil {
-		log.Fatal(err2)
+	wConf := pushbuttons.NewWatcherConfig(pushbuttons.NewGpioWatcher())
+	player := new(pushbuttons.RealPlay)
+	pConf := pushbuttons.NewPlayerConfig(soundfiles, player)
+	errChan := make(chan error, 1)
+
+	err := pushbuttons.PushedButtons(pConf, wConf, errChan)
+	if err != nil {
+		log.Fatal(err)
 	}
 }

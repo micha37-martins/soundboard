@@ -230,7 +230,7 @@ func TestPushedButtons(t *testing.T) {
 			errChan := make(chan error, 1)
 			testPlayerConfig := NewTestPlayerConfig(test.folder, testPlayer)
 			var resultedErr error
-			resultedErr = testWatcherConfig.PushedButtons(testPlayerConfig, errChan)
+			resultedErr = PushedButtons(testPlayerConfig, testWatcherConfig, errChan)
 
 			select {
 			case err, ok := <-errChan:
