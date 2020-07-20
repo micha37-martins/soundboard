@@ -106,9 +106,9 @@ func CheckFiletype(folder, desiredFileType string) error {
 		fileType := http.DetectContentType(buff)
 
 		if fileType != desiredFileType {
-			return errors.New(
-				fmt.Sprintf("Wrong filetype for: %q.\nExpecting audio/mpeg, got %q \n",
-					filename, fileType))
+			return fmt.Errorf(
+				"Wrong filetype for: %q.\nExpecting audio/mpeg, got %q \n",
+				filename, fileType)
 		}
 	}
 	return nil
