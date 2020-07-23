@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// TODO test erfolgreich abschließen
 // TestPlaySound actually plays a Testfile
 // if you are getting an error first check on the path
 func TestPlaySound(t *testing.T) {
@@ -17,8 +18,12 @@ func TestPlaySound(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
-	PlaySound("./testdata/radio.mp3")
-	PlaySound("./testdata/bell.mp3")
+	PlaySound("./testdata/bing.mp3")
+
+	expected := "Playing: ./testdata/bing.mp3"
 
 	t.Log(buf.String())
+	if expected == buf.String() {
+		log.Println("Successful played file.")
+	}
 }

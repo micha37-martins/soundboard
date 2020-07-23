@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := help
 
-GOLANGCI_LINT_VERSION ?= v1.19.1
-TEST_FLAGS ?= -race
+GOLANGCI_LINT_VERSION ?= v1.29.0 # if not set or empty set to v...
+TEST_FLAGS ?= -race # add race condition test flag
 PKGS ?= $(shell go list ./... | grep -v /vendor/)
 
-# help lists all available commands
+# help lists all available commands from this Makefile
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z0-9-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "[32m%-23s[0m %s\n", $$1, $$2}'
@@ -12,43 +12,32 @@ help:
 .PHONY: all
 all: app binary ## install dependencies and build everything
 
-.PHONY: app
-app: deps-app build-app ## install app dependencies and build
-
 .PHONY: binary
 binary: deps pack-app build ## install binary dependencies, pack app and build
 
 .PHONY: deps
 deps: ## install go deps
+  # https://dev.to/defman/introducing-go-mod-1cdo
 	go mod download
-	go get github.com/gobuffalo/packr/packr@v1.30.1
-
-.PHONY: deps-app
-deps-app: ## install node deps
-	cd web && npm install
 
 .PHONY: build
 build: ## build rfoutlet
-	go build -ldflags="-s -w" -o rfoutlet main.go
+	# ldflags add dynamic informations into binary (https://golang.org/cmd/link/)
+	go build -ldflags="-s -w" -o soundboard cmd/main.go
 
-.PHONY: build-app
-build-app: ## build node app
-	cd web && npm run build
-
-.PHONY: pack-app
-pack-app: ## pack app using packr
-	packr
+.PHONY: checkup
+checkup: lint test vet coverage ## checks for errors and bad code
 
 .PHONY: test
 test: ## run tests
 	go test $(TEST_FLAGS) $(PKGS)
 
 .PHONY: vet
-vet: ## run go vet
+vet: ## run go vet to check code for suspicious constructs
 	go vet $(PKGS)
 
 .PHONY: coverage
-coverage: ## generate code coverage
+coverage: ## generate code coverage overview
 	go test $(TEST_FLAGS) -covermode=atomic -coverprofile=coverage.txt $(PKGS)
 	go tool cover -func=coverage.txt
 
@@ -60,9 +49,8 @@ lint: ## run golangci-lint
 
 .PHONY: clean
 clean: ## clean dependencies and artifacts
-	rm -rf vendor/ web/node_modules/ web/build/
-	rm -f rfoutlet
-	packr clean
+	rm -rf vendor/
+	rm -f soundboard
 
 .PHONY: install
 install: build ## install rfoutlet into $GOPATH/bin
@@ -78,11 +66,3 @@ image-amd64: ## build amd64 image
 .PHONY: image-armv7
 image-armv7: ## build armv7 image
 	docker build --build-arg GOARCH=arm --build-arg GOARM=7 -t mohmann/rfoutlet:armv7 .
-
-.PHONY: load-gpio-mockup
-load-gpio-mockup: ## create a mock /dev/gpiochip0 using the gpio-mockup kernel module
-	sudo modprobe gpio-mockup gpio_mockup_ranges=0,40
-
-.PHONY: unload-gpio-mockup
-unload-gpio-mockup: ## unload the gpio-mockup kernel module
-	sudo modprobe --remove gpio-mockup

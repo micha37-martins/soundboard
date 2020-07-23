@@ -94,6 +94,9 @@ func (pConf *playerConfig) checkPins(watcher Watcher, errChan chan error) (uint,
 	var pin uint = 0
 	var value uint = 1
 
+	// To avoiud linting error ineffectual assignment logging var values
+	log.Println("Pin/Value: ", pin, value)
+
 	pin, value = watcher.Watch()
 
 	if value != 0 && value != 1 {

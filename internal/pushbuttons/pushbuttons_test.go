@@ -24,16 +24,8 @@ type testPlayerConfig struct {
 	player Player
 }
 
-type testWatcherConfig struct {
-	watcher Watcher
-}
-
 func newTestPlayer() *testPlayer {
 	return &testPlayer{}
-}
-
-func newTestWatcherConfig(watcher Watcher) *watcherConfig {
-	return &watcherConfig{watcher: watcher}
 }
 
 func NewTestPlayerConfig(folder string, player Player) *testPlayerConfig {
