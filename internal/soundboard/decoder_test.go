@@ -17,7 +17,8 @@ func TestPlaySound(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
-	PlaySound("./testdata/onlymp3/01TypewriterBell.mp3")
+	PlaySound("./testdata/radio.mp3")
+	PlaySound("./testdata/bell.mp3")
 
 	t.Log(buf.String())
 }
