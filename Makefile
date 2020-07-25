@@ -9,11 +9,8 @@ PKGS ?= $(shell go list ./... | grep -v /vendor/) # list packages folder path
 help:
 	@grep -E '^[a-zA-Z0-9-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "[32m%-23s[0m %s\n", $$1, $$2}'
 
-.PHONY: all
-all: app binary ## install dependencies and build everything
-
 .PHONY: binary
-binary: deps pack-app build ## install binary dependencies, pack app and build
+binary: deps build ## install binary dependencies and build
 
 .PHONY: deps
 deps: ## install go deps
@@ -55,14 +52,3 @@ clean: ## clean dependencies and artifacts
 .PHONY: install
 install: build ## install soundboard into $GOPATH/bin
 	mv soundboard $(GOPATH)/bin/soundboard
-
-.PHONY: images
-images: image-amd64 image-armv7 ## build docker images
-
-.PHONY: image-amd64
-image-amd64: ## build amd64 image
-	docker build --build-arg GOARCH=amd64 -t micha37martins/soundboard:amd64 .
-
-.PHONY: image-armv7
-image-armv7: ## build armv7 image
-	docker build --build-arg GOARCH=arm --build-arg GOARM=7 -t micha37martins/soundboard:armv7 .
