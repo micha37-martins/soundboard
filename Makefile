@@ -2,7 +2,7 @@
 
 GOLANGCI_LINT_VERSION ?= v1.29.0 # if not set or empty set to v...
 TEST_FLAGS ?= -race # add race condition test flag
-PKGS ?= $(shell go list ./... | grep -v /vendor/)
+PKGS ?= $(shell go list ./... | grep -v /vendor/) # list packages folder path
 
 # help lists all available commands from this Makefile
 .PHONY: help
@@ -21,7 +21,7 @@ deps: ## install go deps
 	go mod download
 
 .PHONY: build
-build: ## build rfoutlet
+build: ## build soundboard
 	# ldflags add dynamic informations into binary (https://golang.org/cmd/link/)
 	go build -ldflags="-s -w" -o soundboard cmd/main.go
 
@@ -53,16 +53,16 @@ clean: ## clean dependencies and artifacts
 	rm -f soundboard
 
 .PHONY: install
-install: build ## install rfoutlet into $GOPATH/bin
-	mv rfoutlet $(GOPATH)/bin/rfoutlet
+install: build ## install soundboard into $GOPATH/bin
+	mv soundboard $(GOPATH)/bin/soundboard
 
 .PHONY: images
 images: image-amd64 image-armv7 ## build docker images
 
 .PHONY: image-amd64
 image-amd64: ## build amd64 image
-	docker build --build-arg GOARCH=amd64 -t mohmann/rfoutlet:amd64 .
+	docker build --build-arg GOARCH=amd64 -t micha37martins/soundboard:amd64 .
 
 .PHONY: image-armv7
 image-armv7: ## build armv7 image
-	docker build --build-arg GOARCH=arm --build-arg GOARM=7 -t mohmann/rfoutlet:armv7 .
+	docker build --build-arg GOARCH=arm --build-arg GOARM=7 -t micha37martins/soundboard:armv7 .
