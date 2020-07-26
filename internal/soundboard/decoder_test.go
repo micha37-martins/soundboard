@@ -18,9 +18,9 @@ func TestPlaySound(t *testing.T) {
 		log.SetOutput(os.Stderr)
 	}()
 
-	PlaySound("./testdata/bing.mp3")
+	PlaySound("./testdata/bell.mp3")
 
-	expected := "Playing: ./testdata/bing.mp3"
+	expected := "Playing: ./testdata/bell.mp3"
 
 	t.Log(buf.String())
 	if expected == buf.String() {
