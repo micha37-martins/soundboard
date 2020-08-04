@@ -1,0 +1,11 @@
+---
+version: '3'
+services:
+  soundboard:
+    container_name: soundboard
+    build: .
+    devices:
+      - "/dev/snd:/dev/snd"
+    environment:
+      - ALSA_CARD:${SOUND_DEVICE:-PCH}
+    restart: unless-stopped

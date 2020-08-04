@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := help
 
-GOLANGCI_LINT_VERSION ?= v1.29.0 # if not set or empty set to v...
-TEST_FLAGS ?= -race # add race condition test flag
+GOLANGCI_LINT_VERSION ?= v1.29.0 ## if not set or empty set to v...
+TEST_FLAGS ?= -race ## add race condition test flag
 PKGS ?= $(shell go list ./... | grep -v /vendor/) # list packages folder path
 
-# help lists all available commands from this Makefile
+## help lists all available commands from this Makefile
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z0-9-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "[32m%-23s[0m %s\n", $$1, $$2}'
@@ -12,14 +12,14 @@ help:
 .PHONY: binary
 binary: deps build ## install binary dependencies and build
 
+## https://dev.to/defman/introducing-go-mod-1cdo
 .PHONY: deps
 deps: ## install go deps
-  # https://dev.to/defman/introducing-go-mod-1cdo
 	go mod download
 
+## ldflags add dynamic informations into binary (https://golang.org/cmd/link/)
 .PHONY: build
 build: ## build soundboard
-	# ldflags add dynamic informations into binary (https://golang.org/cmd/link/)
 	go build -ldflags="-s -w" -o soundboard cmd/main.go
 
 .PHONY: checkup

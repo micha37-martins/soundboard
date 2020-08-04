@@ -5,6 +5,7 @@ A Soundboard for Raspberry Pi.
 - [Why?](#why)
 - [How does it work?](#how-does-it-work)
 - [Build](#how-to-build)
+- [Docker](#build-and-run-soundboard-container)
 - [Recommendations](#recommendations)
 - [Configuration](#config)
 
@@ -33,6 +34,36 @@ Get dependencies:
 go get github.com/bobertlo/go-mpg123/mpg123
 go get github.com/gordonklaus/portaudio
 go get github.com/micha37-martins/gpio
+```
+
+Docker
+----
+Find your sound device by using
+```sh
+aplay -l
+```
+
+Use environment variable to set your desired sound device
+
+examples:
+```sh
+ALSA_CARD=PCH
+ALSA_CARD=HDMI
+
+```
+
+Build container
+```sh
+docker build -t soundboard .
+```
+
+Run container
+```sh
+docker run -it --rm --device /dev/snd -e "ALSA_CARD=SET_SOUND_DEVICE" test_soundboard:0.0.4 /bin/sh
+```
+Play test sound:
+```sh
+speaker-test
 ```
 
 Recommendations
