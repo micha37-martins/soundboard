@@ -1,3 +1,9 @@
+TODO
+- add picture of buttons
+- make integration test for playback
+
+![soundboard buttons]((assets/buttons.jpg))
+
 Soundboard
 ===================
 A Soundboard for Raspberry Pi.
@@ -8,6 +14,7 @@ A Soundboard for Raspberry Pi.
 - [Docker](#build-and-run-soundboard-container)
 - [Recommendations](#recommendations)
 - [Configuration](#config)
+- [Todo](#optional features)
 
 Why?
 ----
@@ -94,3 +101,7 @@ Map pin 5 to file 01
 ```
 
 The number of entries in `ButtonMap` have to equal the number of soundfiles.
+
+Todo
+----
+Write a soundboard.service example to dovument how to start soundboard program using Systemd.

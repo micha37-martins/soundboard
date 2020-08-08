@@ -1,3 +1,5 @@
+// +build integration
+
 package soundboard
 
 import (
@@ -7,7 +9,6 @@ import (
 	"testing"
 )
 
-// TODO test erfolgreich abschließen
 // TestPlaySound actually plays a Testfile
 // if you are getting an error first check on the path
 func TestPlaySound(t *testing.T) {
