@@ -1,3 +1,9 @@
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/micha37-martins/soundboard)
+[![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/micha37-martins/soundboard)
+[![GoReportCard example](https://goreportcard.com/badge/github.com/micha37-martins/soundboard)](https://goreportcard.com/report/github.com/micha37-martins/soundboard)
+
+![soundboard buttons](assets/buttons.jpg)
+
 Soundboard
 ===================
 A Soundboard for Raspberry Pi.
@@ -5,8 +11,10 @@ A Soundboard for Raspberry Pi.
 - [Why?](#why)
 - [How does it work?](#how-does-it-work)
 - [Build](#how-to-build)
+- [Docker](#build-and-run-soundboard-container)
 - [Recommendations](#recommendations)
 - [Configuration](#config)
+- [Todo](#optional features)
 
 Why?
 ----
@@ -33,6 +41,36 @@ Get dependencies:
 go get github.com/bobertlo/go-mpg123/mpg123
 go get github.com/gordonklaus/portaudio
 go get github.com/micha37-martins/gpio
+```
+
+Docker
+----
+Find your sound device by using
+```sh
+aplay -l
+```
+
+Use environment variable to set your desired sound device
+
+examples:
+```sh
+ALSA_CARD=PCH
+ALSA_CARD=HDMI
+
+```
+
+Build container
+```sh
+docker build -t soundboard .
+```
+
+Run container
+```sh
+docker run -it --rm --device /dev/snd -e "ALSA_CARD=SET_SOUND_DEVICE" test_soundboard:0.0.4 /bin/sh
+```
+Play test sound:
+```sh
+speaker-test
 ```
 
 Recommendations
@@ -63,3 +101,11 @@ Map pin 5 to file 01
 ```
 
 The number of entries in `ButtonMap` have to equal the number of soundfiles.
+
+Todo
+----
+- add picture of buttons
+- document how to start integrationtest
+  - go test -tags=integration
+- write a soundboard.service example to document how to start
+  soundboard using Systemd

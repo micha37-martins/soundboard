@@ -1,0 +1,8 @@
+This project has improved by getting inspiration from Martin Ohmanns repository. It also used the GPIO library from "github.com/brian-armstrong/gpio" in v0.5.0.
+
+His Raspberry-Pi project "rfoutlet" can be found here:
+https://github.com/martinohmann/rfoutlet
+
+For playback of mp3 files I use the great beep library (https://github.com/faiface/beep) and this is relying on oto (https://github.com/hajimehoshi/oto).
+
+As test mp3 file I took this typewriter bell sound: https://freesound.org/people/MasterNavigator/sounds/444813/ (https://creativecommons.org/publicdomain/zero/1.0/)
