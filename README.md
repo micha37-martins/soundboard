@@ -1,8 +1,8 @@
-TODO
-- add picture of buttons
-- make integration test for playback
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/micha37-martins/soundboard)
+[![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/micha37-martins/soundboard)
+[![GoReportCard example](https://goreportcard.com/badge/github.com/micha37-martins/soundboard)](https://goreportcard.com/report/github.com/micha37-martins/soundboard)
 
-![soundboard buttons]((assets/buttons.jpg))
+![soundboard buttons](assets/buttons.jpg)
 
 Soundboard
 ===================
@@ -104,4 +104,8 @@ The number of entries in `ButtonMap` have to equal the number of soundfiles.
 
 Todo
 ----
-Write a soundboard.service example to dovument how to start soundboard program using Systemd.
+- add picture of buttons
+- document how to start integrationtest
+  - go test -tags=integration
+- write a soundboard.service example to document how to start
+  soundboard using Systemd
