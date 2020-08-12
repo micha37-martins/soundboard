@@ -2,7 +2,7 @@
 [![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/micha37-martins/soundboard)
 [![GoReportCard example](https://goreportcard.com/badge/github.com/micha37-martins/soundboard)](https://goreportcard.com/report/github.com/micha37-martins/soundboard)
 
-![soundboard buttons](assets/buttons.jpg)
+![pushbuttons](assets/pushbuttons.jpg)
 
 Soundboard
 ===================

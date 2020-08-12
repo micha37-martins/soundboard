@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-GOLANGCI_LINT_VERSION ?= v1.29.0 ## if not set or empty set to v...
+GOLANGCI_LINT_VERSION ?= v1.29.0 ## ?= means: if not set or empty set to v...
 TEST_FLAGS ?= -race ## add race condition test flag
 PKGS ?= $(shell go list ./... | grep -v /vendor/) # list packages folder path
 

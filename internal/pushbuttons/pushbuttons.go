@@ -17,7 +17,7 @@ import (
 // Initialize ButtonMap
 var buttonMap = config.InitializeButtonMap()
 
-// realPlay is used to implement Player interface in a non test situation
+// RealPlay is used to implement Player interface in a non test situation
 type RealPlay struct{}
 
 type watcherConfig struct {
@@ -41,6 +41,7 @@ type Watcher interface {
 	Close()
 }
 
+// PinWatcher defines interface for watchPins
 type PinWatcher interface {
 	watchPins(wConf *watcherConfig, errChan chan error)
 }
@@ -111,7 +112,7 @@ func (pConf *playerConfig) checkPins(watcher Watcher, errChan chan error) (uint,
 	return pin, value
 }
 
-// watchPins continously calls checkPins to test if a button has been pushed
+// watchPins continuously calls checkPins to test if a button has been pushed
 func (pConf *playerConfig) watchPins(wConf *watcherConfig, errChan chan error) {
 	log.Println("ButtonMap: ", buttonMap)
 

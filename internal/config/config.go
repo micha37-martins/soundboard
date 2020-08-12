@@ -4,9 +4,10 @@ import (
 	"os"
 )
 
-const SoundfilesFolder string = "./soundfiles" + string(os.PathSeparator)
+// SoundfilesFolder creates compatible path for soundfiles
+const SoundfilesFolder string = "." + string(os.PathSeparator) + "soundfiles" + string(os.PathSeparator)
 
-// ButtonMap implements the mapping of button, GPIO-pin and sound-file
+// InitializeButtonMap implements the mapping of button, GPIO-pin and sound-file
 // it must be set to fit your device GPIO pins
 // key defines the GPIO Pin
 // value defines the Name
