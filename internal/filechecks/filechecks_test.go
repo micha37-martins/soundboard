@@ -33,13 +33,14 @@ func TestGetFileInfos(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			_, err := getFileInfos(test.folder)
+			log.Println("Returned error: ", err)
 			if test.expectedError == "" {
 				if err != nil {
 					t.Errorf("got %q, want no error", err)
 				} else {
 					t.Logf("No error for test %q", test.name)
 				}
-			} else if err.Error() != test.expectedError {
+			} else if (err == nil) || (err.Error() != test.expectedError) {
 				t.Errorf("got %q, want %q", err, test.expectedError)
 			}
 		})

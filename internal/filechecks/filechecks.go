@@ -17,7 +17,9 @@ func getFileInfos(folder string) ([]os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(fileInfos) == 0 {
+	// .gitignore file is needed to upload an ampty folder to git repo
+	// see: https://stackoverflow.com/questions/115983/how-can-i-add-an-empty-directory-to-a-git-repository/180917#180917
+	if (len(fileInfos) == 0) || fileInfos[0].Name() == ".gitignore" {
 		noFilesErr := "No files in folder: " + folder
 		return nil, errors.New(noFilesErr)
 	}
