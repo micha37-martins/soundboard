@@ -109,3 +109,4 @@ Todo
   - go test -tags=integration
 - write a soundboard.service example to document how to start
   soundboard using Systemd
+- add troubleshoot if filecheck fails cause of empty dir
