@@ -13,5 +13,5 @@ jobs:
       uses: codecov/codecov-action@v1.0.12
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        flags: unittests
+        #flags: unittests
         name: codecov-umbrella
