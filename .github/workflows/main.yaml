@@ -7,10 +7,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - name: Test
-      run:  make test
-    - name: Generate coverage report
-      run:  make coverage
+    - name: Run test and codecov action
+      uses: ./.github/actions/test_and_coverage
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1.0.12
       with:
