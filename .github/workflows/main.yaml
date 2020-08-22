@@ -1,0 +1,17 @@
+name: Test and cover workflow
+on: [push]
+jobs:
+  test_and_cover:
+    name: testing and coverage
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Run test and codecov action
+      uses: ./.github/actions/test_and_coverage
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1.0.12
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
+        name: codecov-umbrella

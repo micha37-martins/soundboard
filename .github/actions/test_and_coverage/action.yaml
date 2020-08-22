@@ -1,0 +1,7 @@
+name: "Prepare docker container"
+description: "Adds dependencies for soundboard to stock alpine image"
+author: "micha37"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
