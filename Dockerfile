@@ -20,8 +20,4 @@ ADD soundfiles/ soundfiles/
 
 RUN make build
 
-#FROM scratch
-
-#COPY --from=golang-builder /go/src/github.com/micha37-martins/soundboard/soundboard /soundboard
-
 ENTRYPOINT ["./soundboard"]
