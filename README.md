@@ -4,7 +4,6 @@ Soundboard
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/micha37-martins/soundboard)
 [![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/micha37-martins/soundboard)
 [![GoReportCard example](https://goreportcard.com/badge/github.com/micha37-martins/soundboard)](https://goreportcard.com/report/github.com/micha37-martins/soundboard)
-[![codecov](https://codecov.io/gh/micha37-martins/soundboard/branch/master/graph/badge.svg)](https://codecov.io/gh/micha37-martins/soundboard)
 
 A Soundboard for Raspberry Pi.
 
