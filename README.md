@@ -20,6 +20,7 @@ Contents
 - [Recommendations](#recommendations)
 - [Configuration](#configuration)
 - [Testing](#testing)
+- [Troubleshoot](#troubleshoot)
 - [Todo](#todo)
 
 What is the purpose of this tool?
@@ -39,7 +40,7 @@ Linux (Raspbian)
 
 Install needed Debian packages:
 ```sh
-sudo apt-get install build-essential libasound2-dev alsa-lib
+sudo apt-get install build-essential libasound2-dev alsa-utils
 ```
 
 Get dependencies:
@@ -60,6 +61,7 @@ Prerequisites
 - Wiring
 - Pushbuttons
 - A suitable case for a soundboard
+- An output device like a speaker
 
 ### Recommendations
 
@@ -74,8 +76,28 @@ for every push button connected. The resistor should have between 10 and 100 k&#
 
 Older software versions may also work, but I did not test that.
 
+### Soundfiles
+
+- .mp3 files have to be stored in ./soundfiles folder
+- the .gitignore file in this folder have to be removed
+
 Build and run soundboard container
 ----
+
+### Install Docker
+
+To install Docker on a raspberry pi you basically need:
+```sh
+curl -sSL https://get.docker.com | sh
+```
+And after the command finished you most likely want to run:
+```sh
+sudo usermod -aG docker pi
+```
+Source: [Docker install guide](https://dev.to/rohansawant/installing-docker-and-docker-compose-on-the-raspberry-pi-in-5-simple-steps-3mgl "Install guide")
+
+### Use Docker
+
 Find your sound device by using
 ```sh
 aplay -l
@@ -87,7 +109,7 @@ examples:
 ```sh
 ALSA_CARD=PCH
 ALSA_CARD=HDMI
-
+ALSA_CARD=0
 ```
 
 Build container
@@ -97,13 +119,28 @@ docker build -t soundboard .
 
 Run container
 ```sh
-docker run -it --rm --device /dev/snd -e "ALSA_CARD=SET_SOUND_DEVICE" soundboard:0.0.1 /bin/sh
+docker run -it --rm --device /dev/snd -e "ALSA_CARD=SET_YOUR_SOUND_DEVICE" -v /sys:/sys soundboard:0.0.1 /bin/sh
 ```
 Play test sound:
 ```sh
 speaker-test
 ```
 
+Example:
+```sh
+docker run -it --rm --device /dev/snd -e "ALSA_CARD=0" -v /sys:/sys soundboard:0.0.1 /bin/sh
+```
+
+### Use Docker-Compose
+You can also use docker-compose to run the soundboard container. The sound_device 
+you discovered using `aplay -l` can be configured in the `.env` file. The default 
+is "PCH".
+
+```sh
+docker-compose up --build
+```
+
+The `--build` flag is needed at first start only.
 
 Configuration
 ----
@@ -133,8 +170,18 @@ A usual go test is configured in the `Makefile` but it will not do an integratio
 go test -tags=integration
 ```
 
+Troubleshoot
+----
+- "No files in folder: ./soundfiles/"
+  - Remove the hidden `.gitignore` file from the `./soundfiles` folder
+- "failed to open gpio 13 direction file for writing"
+  - use sudo to run soundboard
+  - e.g. `sudo /usr/local/go/bin/go run cmd/main.go`
+- Cannot play sound when using a Docker container
+  - mount the `/sys` directory to have acess to gpio file
+  - select the correct sound_card
+
 Todo
 ----
 - write a soundboard.service example to document how to start
   soundboard using Systemd
-- add troubleshoot if filecheck fails cause of empty dir

@@ -6,6 +6,7 @@ services:
     build: .
     devices:
       - "/dev/snd:/dev/snd"
+      - "/sys:/sys"
     environment:
-      - ALSA_CARD:${SOUND_DEVICE:-PCH}
+      - ALSA_CARD:${SOUND_DEVICE:-PCH} #configurable in .env file
     restart: unless-stopped
